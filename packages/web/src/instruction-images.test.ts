@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { getInstructionImageSrc } from './instruction-images.js';
+import { getInstructionImageAlt, getInstructionImageSrc } from './instruction-images.js';
 
 test('Task 1 shared-trial rating explanation uses the supplied fourth instruction image', () => {
   assert.equal(
@@ -36,4 +36,17 @@ test('Task 2 point-to-point instruction pages use the supplied six images', () =
   for (const [instruction, imageSrc] of pages) {
     assert.equal(getInstructionImageSrc(instruction, 'task9'), imageSrc);
   }
+});
+
+test('Task 2 point-transition image follows the configured trial duration', () => {
+  const instruction = 'Once you earn a point, the green target flashes and a new pair of targets appears. Reach as many red targets as possible within 5 seconds.';
+
+  assert.equal(
+    getInstructionImageSrc(instruction, 'task9'),
+    '/task9-instruction2-point-transition.png',
+  );
+  assert.equal(
+    getInstructionImageAlt(instruction),
+    'The reached target flashes green while a new pair of red targets appears.',
+  );
 });
