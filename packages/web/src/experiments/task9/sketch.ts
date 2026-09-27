@@ -77,12 +77,18 @@ function ensureTrialState(scene: SketchScene, now: number): {
   if (phase === 'shared') {
     const sequence = numberParam(params.sequence, 0);
     const score = numberParam(params.score, 0);
-    const targetIndex = numberParam(params.targetIndex, trialState.targetIndex);
+    const previousTargetIndex = numberParam(params.previousTargetIndex, trialState.previousTargetIndex);
+    const targetIndices = Array.isArray(params.targetIndices)
+      && params.targetIndices.length === 2
+      && params.targetIndices.every((value) => Number.isInteger(Number(value)))
+      ? [Number(params.targetIndices[0]), Number(params.targetIndices[1])] as [number, number]
+      : trialState.targetIndices;
     const targetPresentedAt = numberParam(params.targetPresentedAt, receivedAt);
     trialState = syncTask9AuthoritativeState(trialState, {
       sequence,
       score,
-      targetIndex,
+      previousTargetIndex,
+      targetIndices,
       targetPresentedAt,
     });
   }
@@ -90,7 +96,7 @@ function ensureTrialState(scene: SketchScene, now: number): {
   const initKey = `${trialState.trialKey}:${trialState.identityKey}:${trialState.sequence}`;
   if (initializedEventKey !== initKey) {
     initializedEventKey = initKey;
-    const point = GRID[trialState.targetIndex];
+    const points = trialState.targetIndices.map((targetIndex) => GRID[targetIndex]);
     dispatchState('task9-score-state', {
       trialKey,
       trialNumber: numberParam(params.trialNumber, 0),
@@ -98,8 +104,9 @@ function ensureTrialState(scene: SketchScene, now: number): {
       identityKey,
       sequence: trialState.sequence,
       score: trialState.score,
-      targetIndex: trialState.targetIndex,
-      targetPosition: point,
+      previousTargetIndex: trialState.previousTargetIndex,
+      targetIndices: trialState.targetIndices,
+      targetPositions: points,
       targetPresentedAt: trialState.targetPresentedAt,
     });
   }
@@ -117,15 +124,16 @@ function ensureTrialState(scene: SketchScene, now: number): {
 function drawGrid(
   p: Parameters<TaskSketch['drawTaskLayer']>[0],
   coords: CoordMap,
-  activeIndex: number,
-  activeFill: string,
+  activeIndices: [number, number],
+  insideTargetIndex: number | null,
 ) {
   p.push();
   p.strokeWeight(2);
   for (let index = 0; index < GRID.length; index += 1) {
     const point = GRID[index];
-    const active = index === activeIndex;
+    const active = activeIndices.includes(index);
     if (active) {
+      const activeFill = index === insideTargetIndex ? '#16a34a' : '#dc2626';
       p.stroke(activeFill);
       p.fill(activeFill);
     } else {
@@ -204,11 +212,12 @@ const sketch: TaskSketch = {
 
     const clock = getTask9Clock(now - trialStartedAt, trial.countdownMs, trial.durationMs);
     const cursor = controlCursor(scene, trial.phase);
-    const activePoint = GRID[trialState.targetIndex];
-    const inside = cursor
-      ? pixelDistance(activePoint, cursor, coords) <= TARGET_DIAMETER / 2
-      : false;
-    const renderState = getTask9RenderState(clock.phase, inside);
+    const insideTargetIndex = cursor
+      ? trialState.targetIndices.find((targetIndex) => (
+        pixelDistance(GRID[targetIndex], cursor, coords) <= TARGET_DIAMETER / 2
+      )) ?? null
+      : null;
+    const renderState = getTask9RenderState(clock.phase, insideTargetIndex !== null);
 
     if (clock.phase === 'countdown') {
       scene.lines = [];
@@ -231,13 +240,13 @@ const sketch: TaskSketch = {
       return;
     }
 
-    drawGrid(p, coords, trialState.targetIndex, renderState.targetFill);
+    drawGrid(p, coords, trialState.targetIndices, insideTargetIndex);
     drawHud(p, coords, trialState.score, clock.remainingSeconds);
 
     if (!cursor) return;
     const result = updateTask9TrialHit(
       trialState,
-      inside,
+      insideTargetIndex,
       now,
       trial.dwellMs,
       trial.phase === 'shared' ? 'shared' : 'solo',
@@ -251,7 +260,10 @@ const sketch: TaskSketch = {
       trialNumber: trial.trialNumber,
       phase: trial.phase,
       targetPosition: GRID[acquisition.targetIndex],
+      targetPositions: acquisition.targetIndices.map((targetIndex) => GRID[targetIndex]),
+      unchosenTargetPosition: GRID[acquisition.unchosenTargetIndex],
       nextTargetPosition: GRID[acquisition.nextTargetIndex],
+      nextTargetPositions: acquisition.nextTargetIndices.map((targetIndex) => GRID[targetIndex]),
     });
   },
 

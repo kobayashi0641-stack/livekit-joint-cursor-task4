@@ -6,6 +6,26 @@
 
 ---
 
+## 2026-09-27 — Task9の参加者別2ターゲット保存カラムを追加
+
+Task9で各参加者に表示された2ターゲットをフレーム単位で保存するため、`frames`へ次のJSONBカラムを追加した。
+
+| テーブル | カラム | 型 | デフォルト | 用途 |
+|---|---|---|---|---|
+| `frames` | `participant_target_pairs` | `JSONB NOT NULL` | `'{}'::jsonb` | `{identity → {targetIndices, targetPositions, previousTargetIndex, sequence, score, targetPresentedAt, ...}}` |
+
+既存DBへは次を適用し、PostgRESTのスキーマキャッシュを更新する。
+
+```sql
+ALTER TABLE frames
+  ADD COLUMN IF NOT EXISTS participant_target_pairs JSONB NOT NULL DEFAULT '{}'::jsonb;
+NOTIFY pgrst, 'reload schema';
+```
+
+既存録画は空オブジェクトで埋まるため影響を受けない。新しいクライアントは完全な録画を `recordings.session_json` にも保存するため、カラム未適用時のレガシーフォールバックでもダウンロードJSONには参加者別ターゲットペアが保持される。
+
+---
+
 ## 2026-05-06 — 録画ファイル名構築用カラムを追加
 
 ### 背景

@@ -11,7 +11,7 @@
 import { Room, RoomEvent } from '@livekit/rtc-node';
 
 const SERVER = process.env.SERVER ?? 'http://localhost:3001';
-const ROOM = process.env.ROOM ?? 'joint-cursor-task2';
+const ROOM = process.env.ROOM ?? 'joint-cursor-task4';
 const IDENTITY = process.env.IDENTITY ?? `debug-listener-${Date.now()}`;
 
 const VERSION = 1;

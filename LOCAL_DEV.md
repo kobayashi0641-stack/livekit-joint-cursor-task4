@@ -75,7 +75,7 @@ ADMIN_PASSWORD=<管理者パスワード>
 
 > **重要**: ローカル開発でも、実際の LiveKit Cloud の API Key / Secret を使用してください。LiveKit Cloud はサードパーティの SaaS（SFU サーバー）であり、ローカルにホストできません。ローカルのサーバーと Web アプリは LiveKit Cloud に接続してリアルタイム通信を行います。
 >
-> 本番環境と同じ API キーを使う場合、ルーム名がデフォルトで `joint-cursor-task2` になるため、本番環境と同じルームに接続されます。本番と分離したい場合は、ローカルでは別のルーム名（例: `joint-cursor-task2-dev`）を使うことをお勧めします。
+> 本番環境と同じ API キーを使う場合、ルーム名がデフォルトで `joint-cursor-task4` になるため、本番環境と同じルームに接続されます。本番と分離したい場合は、ローカルでは別のルーム名（例: `joint-cursor-task4-dev`）を使うことをお勧めします。
 
 ### 3.2 Webアプリ（`packages/web/.env.local`）— 任意
 
@@ -119,7 +119,7 @@ npm run dev:web
 curl http://localhost:3001/healthz
 # => {"status":"ok"}
 
-curl "http://localhost:3001/token?room=joint-cursor-task2"
+curl "http://localhost:3001/token?room=joint-cursor-task4"
 # => JWT トークンと LiveKit URL が返る
 ```
 
@@ -141,7 +141,7 @@ curl "http://localhost:3001/token?room=joint-cursor-task2"
 1. ブラウザで `http://localhost:5173` を開く
 2. 接続パラメータを入力（通常はデフォルトのまま）:
    - Token server: `http://localhost:3001`
-   - Room: `joint-cursor-task2`（任意）
+   - Room: `joint-cursor-task4`（任意）
    - Identity: 空でもOK（サーバーが自動生成）
 3. 「Connect」をクリック
 4. 白いステージ内でマウスを動かすと、自分のカーソルが表示されます
@@ -440,7 +440,7 @@ npm run simulate
 npm run simulate -- --count 10
 
 # 全オプション指定
-npm run simulate -- --count 10 --server http://localhost:3001 --room joint-cursor-task2
+npm run simulate -- --count 10 --server http://localhost:3001 --room joint-cursor-task4
 ```
 
 各ボットはノイズ付きの円軌道を描きます。

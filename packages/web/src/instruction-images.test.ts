@@ -23,9 +23,10 @@ test('Task 1 final baseline explanation moves to the fifth instruction image', (
   );
 });
 
-test('Task 2 point-to-point instruction pages use the supplied five images', () => {
+test('Task 2 point-to-point instruction pages use the supplied six images', () => {
   const pages = [
-    ['Reach as many red targets as possible within 45 seconds. Keep the cursor inside the target briefly to earn a point. Passing through does not count.', '/task9-instruction1.png'],
+    ['Two red targets will appear at the same time. Move the cursor to either one and stay on it briefly to earn a point.', '/task9-instruction1-two-targets.png'],
+    ['Once you earn a point, the green target flashes and a new pair of targets appears. Reach as many red targets as possible within 30 seconds.', '/task9-instruction2-point-transition.png'],
     ['You will first complete baseline trials using your own cursor.', '/task9-instruction2.png'],
     ['After that, you will control a shared cursor with the other participant.', '/task9-instruction3.png'],
     ['After each shared-cursor trial, rate your contribution to earning the points.', '/task9-instruction4.png'],

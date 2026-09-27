@@ -49,7 +49,8 @@ test('Task9 uses a 30-second baseline/shared/washout point-to-point sequence', (
 
 test('Task9 instructions include the shared-trial contribution rating page', () => {
   assert.deepEqual(task9Task.generateInstructions(DEFAULT_EXPERIMENT_CONFIG), [
-    'Reach as many red targets as possible within 30 seconds. Keep the cursor inside the target briefly to earn a point. Passing through does not count.',
+    'Two red targets will appear at the same time. Move the cursor to either one and stay on it briefly to earn a point.',
+    'Once you earn a point, the green target flashes and a new pair of targets appears. Reach as many red targets as possible within 30 seconds.',
     'You will first complete baseline trials using your own cursor.',
     'After that, you will control a shared cursor with the other participant.',
     'After each shared-cursor trial, rate your contribution to earning the points.',
@@ -64,8 +65,8 @@ test('Task9 instruction uses the configured trial duration', () => {
   });
 
   assert.equal(
-    instructions[0],
-    'Reach as many red targets as possible within 45 seconds. Keep the cursor inside the target briefly to earn a point. Passing through does not count.',
+    instructions[1],
+    'Once you earn a point, the green target flashes and a new pair of targets appears. Reach as many red targets as possible within 45 seconds.',
   );
 });
 

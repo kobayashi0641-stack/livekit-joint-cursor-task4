@@ -2,13 +2,13 @@
 
 ## 🚀 クイックスタート（実験を迅速に実行する場合）
 
-このプロジェクトは既存のLiveKit協調カーソル基盤から分離した、新しい実験プロトコル用の環境です。本番環境は `https://livekit-joint-cursor-task2.onrender.com` です。
+このプロジェクトは既存のLiveKit協調カーソル基盤から分離した、新しい実験プロトコル用の環境です。本番環境は `https://livekit-joint-cursor-task4.onrender.com` です。
 
 ### 管理者として接続する
 
 管理者用URL（実験の制御、参加者の監視、録画機能などにアクセス可能）：
 ```
-https://livekit-joint-cursor-task2.onrender.com/?admin=<ADMIN_PASSWORD>
+https://livekit-joint-cursor-task4.onrender.com/?admin=<ADMIN_PASSWORD>
 ```
 
 管理者パスワードはRenderの `ADMIN_PASSWORD` 環境変数に設定されています。リポジトリには保存しません。
@@ -17,7 +17,7 @@ https://livekit-joint-cursor-task2.onrender.com/?admin=<ADMIN_PASSWORD>
 
 参加者用URL（Prolific参加者IDをシミュレート）：
 ```
-https://livekit-joint-cursor-task2.onrender.com/?PROLIFIC_PID=test1
+https://livekit-joint-cursor-task4.onrender.com/?PROLIFIC_PID=test1
 ```
 
 他の参加者IDでテストする場合は、`test1`を`test2`、`test3`などに変更してください。
@@ -27,7 +27,7 @@ https://livekit-joint-cursor-task2.onrender.com/?PROLIFIC_PID=test1
 複数の参加者をシミュレートしてシステムの負荷テストを行う場合、ダミーカーソル機能を使用できます：
 
 ```
-https://livekit-joint-cursor-task2.onrender.com/?PROLIFIC_PID=dummy1&dummy=1
+https://livekit-joint-cursor-task4.onrender.com/?PROLIFIC_PID=dummy1&dummy=1
 ```
 
 ダミーカーソルを有効にすると、マウスを動かさなくても自動的にカーソルが動き続けます（リサージュ曲線パターン）。複数のブラウザウィンドウで異なる参加者IDを使用して開くことで、多数の参加者をシミュレートできます。
@@ -222,7 +222,7 @@ npm run dev:web
 
 Open `http://localhost:5173` and provide:
 - **Token server** – usually `http://localhost:3001`
-- **Room** – defaults to `joint-cursor-task2`
+- **Room** – defaults to `joint-cursor-task4`
 - **Identity** (optional) – omit to let the server generate one
 
 Once connected, move the pointer over the stage to stream your position. Every participant is rendered with a deterministic colour, and the aggregate average cursor is highlighted.
@@ -344,7 +344,7 @@ Admin 画面の Task Mode ボタンから手動で TaskMode を切り替え可�
 http://localhost:5173/?admin=agent
 
 # 本番環境（Render.com）
-https://livekit-joint-cursor-task2.onrender.com/?admin=agent
+https://livekit-joint-cursor-task4.onrender.com/?admin=agent
 ```
 
 アクセスすると、管理者パスワードの入力画面が表示されます。パスワードはサーバーの `ADMIN_PASSWORD` 環境変数に設定された値です。
@@ -1015,7 +1015,7 @@ y=1.0 └─────────────────────┴─�
 
 ```json
 {
-  "roomName": "joint-cursor-task2",
+  "roomName": "joint-cursor-task4",
   "startTime": 1234567890000,
   "endTime": 1234567900000,
   "frameRate": 60,
@@ -1611,7 +1611,7 @@ const { LIVEKIT_API_KEY, LIVEKIT_API_SECRET } = process.env;
 
 const app = express();
 app.get('/token', async (req, res) => {
-  const room = String(req.query.room ?? 'joint-cursor-task2');
+  const room = String(req.query.room ?? 'joint-cursor-task4');
   const identity = String(req.query.id ?? crypto.randomUUID());
 
   const at = new AccessToken(LIVEKIT_API_KEY!, LIVEKIT_API_SECRET!, {

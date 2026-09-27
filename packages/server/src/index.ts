@@ -18,7 +18,7 @@ const roomService = new RoomServiceClient(env.wsUrl, env.apiKey, env.apiSecret);
 const prolificClient = env.prolificApiToken
   ? new ProlificClient(env.prolificApiToken, env.prolificApiBaseUrl)
   : null;
-const agent = new ExperimentAgent(roomService, 'joint-cursor-task2', prolificClient);
+const agent = new ExperimentAgent(roomService, 'joint-cursor-task4', prolificClient);
 
 const app = express();
 app.use(cors());
@@ -65,7 +65,7 @@ app.get('/latency-threshold', (_, res) => {
 app.get('/token', async (req, res) => {
   const room = typeof req.query.room === 'string' && req.query.room.length > 0
     ? req.query.room
-    : 'joint-cursor-task2';
+    : 'joint-cursor-task4';
   
   const adminPassword = typeof req.query.adminPassword === 'string' ? req.query.adminPassword : '';
   const isAdmin = adminPassword.length > 0 && adminPassword === env.adminPassword;

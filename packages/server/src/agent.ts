@@ -229,7 +229,7 @@ export class ExperimentAgent {
 
   constructor(
     roomService: RoomServiceClient,
-    roomName: string = 'joint-cursor-task2',
+    roomName: string = 'joint-cursor-task4',
     prolificGateway: ProlificGateway | null = null,
   ) {
     this.roomService = roomService;

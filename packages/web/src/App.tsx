@@ -26,6 +26,14 @@ import {
   shouldShowTask9SharedFeedback,
   type Task9Acquisition,
 } from './experiments/task9/point-to-point.js';
+import {
+  buildTask9AcquisitionEvent,
+  buildTask9TargetStateReport,
+  snapshotTask9ParticipantTargetPairs,
+  type Task9AcquisitionEvent,
+  type Task9ParticipantTargetPair,
+  type Task9TargetStateReport,
+} from './experiments/task9/recording.js';
 import { getInitialExperimentTaskType } from './admin-agent-controls-config-sync.js';
 import { TaskStage, type P5Dot, type P5Line, type P5Target, type P5Guide, type P5YesNo, type ExperimentTaskType } from './experiments/TaskStage';
 import {
@@ -373,7 +381,7 @@ type AdminEvent =
   | { timestamp: number; type: 'cursorVisibilityChanged'; hideCursor: boolean }
   | { timestamp: number; type: 'targetShown' }
   | { timestamp: number; type: 'targetHidden' }
-  | { timestamp: number; type: 'task9ScoreAcquired'; trialKey: string; trialNumber: number; phase: string; score: number; sequence: number; targetIndex: number; nextTargetIndex: number }
+  | Task9AcquisitionEvent
   | { timestamp: number; type: 'virtualCursorModeChanged'; useVirtualCursor: boolean }
   | { timestamp: number; type: 'sharedCursorResponse'; identity: string; trialNumber: number; questionnaireKind: 'legacy' | 'contribution'; agency?: number; partnership?: number; contribution?: number }
   | { timestamp: number; type: 'sharedTrackingStart' | 'sharedTrackingComplete'; identity: string; trialKey: string; participantTimestamp: number }
@@ -662,6 +670,8 @@ type FrameSnapshot = {
   target: { x: number; y: number; shape: 'triangle' | 'circle' | 'square' } | null;
   /** Target each participant saw during independently gated Task 6 trials. */
   participantTargets?: Record<string, { x: number; y: number; shape: 'circle' } | null>;
+  /** The two Task9 targets visible to each participant at this frame. */
+  participantTargetPairs?: Record<string, Task9ParticipantTargetPair | null>;
   /** Per-group average cursor positions for group experiments. Empty for single-group. */
   groupAverages?: Record<number, { x: number; y: number }>;
 };
@@ -1138,7 +1148,7 @@ function ReplayModal({ recording, onClose }: { recording: RecordingRecord; onClo
       setLoadError(null);
       try {
         const FRAME_BATCH_SIZE = 1000;
-        let allFramesData: { frame_number: number; timestamp: number; cursors: CursorSnapshot[]; average_x: number | null; average_y: number | null; target_x: number | null; target_y: number | null; target_shape: string | null; group_averages?: Record<string, { x: number; y: number }> }[] = [];
+        let allFramesData: { frame_number: number; timestamp: number; cursors: CursorSnapshot[]; average_x: number | null; average_y: number | null; target_x: number | null; target_y: number | null; target_shape: string | null; participant_target_pairs?: FrameSnapshot['participantTargetPairs']; group_averages?: Record<string, { x: number; y: number }> }[] = [];
         let offset = 0;
         let hasMore = true;
 
@@ -1183,6 +1193,7 @@ function ReplayModal({ recording, onClose }: { recording: RecordingRecord; onClo
             target: f.target_x !== null && f.target_y !== null && f.target_shape !== null
               ? { x: f.target_x, y: f.target_y, shape: f.target_shape as 'triangle' | 'circle' | 'square' }
               : null,
+            ...(f.participant_target_pairs ? { participantTargetPairs: f.participant_target_pairs } : {}),
             ...(groupAverages ? { groupAverages } : {}),
           };
         });
@@ -1540,7 +1551,7 @@ async function fetchRecordingSession(recording: RecordingRecord): Promise<Record
   }
 
   const FRAME_BATCH_SIZE = 1000;
-  let allFramesData: { frame_number: number; timestamp: number; cursors: CursorSnapshot[]; average_x: number | null; average_y: number | null; target_x: number | null; target_y: number | null; target_shape: string | null; participant_targets?: FrameSnapshot['participantTargets']; group_averages?: Record<string, { x: number; y: number }> }[] = [];
+  let allFramesData: { frame_number: number; timestamp: number; cursors: CursorSnapshot[]; average_x: number | null; average_y: number | null; target_x: number | null; target_y: number | null; target_shape: string | null; participant_targets?: FrameSnapshot['participantTargets']; participant_target_pairs?: FrameSnapshot['participantTargetPairs']; group_averages?: Record<string, { x: number; y: number }> }[] = [];
   let offset = 0;
   let hasMore = true;
 
@@ -1610,6 +1621,7 @@ async function fetchRecordingSession(recording: RecordingRecord): Promise<Record
         ? { x: f.target_x, y: f.target_y, shape: f.target_shape as 'triangle' | 'circle' | 'square' }
         : null,
       ...(f.participant_targets ? { participantTargets: f.participant_targets } : {}),
+      ...(f.participant_target_pairs ? { participantTargetPairs: f.participant_target_pairs } : {}),
       ...(groupAverages ? { groupAverages } : {}),
     };
   });
@@ -2731,7 +2743,7 @@ export default function App() {
   });
   const [connectionState, setConnectionState] = useState<ConnectionState>('disconnected');
   const [tokenServerUrl, setTokenServerUrl] = useState(() => defaultServer);
-  const [roomName, setRoomName] = useState('joint-cursor-task2');
+  const [roomName, setRoomName] = useState('joint-cursor-task4');
   const [identityInput, setIdentityInput] = useState(() => {
     if (isMobileMode && typeof window !== 'undefined') {
       return sessionStorage.getItem('mobile_username') || '';
@@ -3423,6 +3435,7 @@ export default function App() {
   const recordingFrameNumberRef = useRef(0);
   const pendingTrialMetadataRef = useRef<Record<string, unknown> | null>(null);
   const sharedTrackingStartsRef = useRef<Map<string, { trialKey: string; receivedAt: number }>>(new Map());
+  const task9ParticipantTargetStatesRef = useRef<Map<string, Task9TargetStateReport>>(new Map());
   const sharedTrackingCompletionTimersRef = useRef<Map<string, number>>(new Map());
   const captureFrameRef = useRef<(() => void) | null>(null);
   const stopDemoRef = useRef<() => void>(() => {});
@@ -3558,6 +3571,12 @@ export default function App() {
         ? { x: representativeTarget.x, y: representativeTarget.y, shape: representativeTarget.shape }
         : null;
     }
+    const participantTargetPairs = experimentTaskTypeRef.current === 'task9'
+      ? snapshotTask9ParticipantTargetPairs(
+          cursors.map((cursor) => cursor.identity),
+          task9ParticipantTargetStatesRef.current,
+        )
+      : undefined;
 
     const frame: FrameSnapshot = {
       timestamp: Date.now(),
@@ -3566,6 +3585,7 @@ export default function App() {
       average,
       target,
       ...(participantTargets ? { participantTargets } : {}),
+      ...(participantTargetPairs ? { participantTargetPairs } : {}),
       ...(groupAvgs ? { groupAverages: groupAvgs } : {}),
     };
 
@@ -3621,13 +3641,41 @@ export default function App() {
       }
     };
     const handleScoreState = (event: Event) => {
-      updateDisplayedScore((event as CustomEvent<Record<string, unknown>>).detail ?? {});
+      const detail = (event as CustomEvent<Record<string, unknown>>).detail ?? {};
+      updateDisplayedScore(detail);
+      const room = roomRef.current;
+      const identity = isAdminRef.current
+        ? 'shared'
+        : (room?.localParticipant.identity || localIdentityRef.current);
+      const report = buildTask9TargetStateReport(identity, detail, Date.now());
+      if (!report) return;
+      if (isAdminRef.current) {
+        task9ParticipantTargetStatesRef.current.set(report.identity, report);
+        return;
+      }
+      if (room) {
+        const payload = new TextEncoder().encode(JSON.stringify(report));
+        void room.localParticipant.publishData(payload, { reliable: true, topic: STATS_TOPIC });
+      }
     };
     const handleScoreAcquired = (event: Event) => {
       const detail = (event as CustomEvent<Task9Acquisition & { trialNumber?: number; phase?: string }>).detail;
       if (!detail) return;
       if (detail.phase !== 'shared') {
         updateDisplayedScore(detail as unknown as Record<string, unknown>);
+        if (!isAdminRef.current) {
+          const room = roomRef.current;
+          const identity = room?.localParticipant.identity || localIdentityRef.current;
+          const acquisitionEvent = buildTask9AcquisitionEvent(
+            identity,
+            detail as unknown as Record<string, unknown>,
+            Date.now(),
+          );
+          if (room && acquisitionEvent) {
+            const payload = new TextEncoder().encode(JSON.stringify(acquisitionEvent));
+            void room.localParticipant.publishData(payload, { reliable: true, topic: STATS_TOPIC });
+          }
+        }
         return;
       }
       if (!isAdminRef.current) return;
@@ -3666,17 +3714,12 @@ export default function App() {
         const payload = new TextEncoder().encode(JSON.stringify(message));
         void room.localParticipant.publishData(payload, { reliable: true, topic: TARGET_TOPIC });
       }
-      logAdminEvent({
-        type: 'task9ScoreAcquired',
-        timestamp: now,
-        trialKey: detail.trialKey,
-        trialNumber: Number(detail.trialNumber ?? 0),
-        phase: detail.phase,
-        score: Number(nextParams.score),
-        sequence: Number(nextParams.sequence),
-        targetIndex: detail.targetIndex,
-        nextTargetIndex: detail.nextTargetIndex,
-      });
+      const acquisitionEvent = buildTask9AcquisitionEvent(
+        'shared',
+        detail as unknown as Record<string, unknown>,
+        now,
+      );
+      if (acquisitionEvent) logAdminEvent(acquisitionEvent);
     };
 
     window.addEventListener('task9-score-state', handleScoreState);
@@ -3702,6 +3745,7 @@ export default function App() {
     const startTime = Date.now();
     
     recordingFrameNumberRef.current = 0;
+    task9ParticipantTargetStatesRef.current.clear();
     setIsRecording(true);
     const participantCount = experimentParticipantIdentitySetRef.current.size;
     const session: RecordingSession = {
@@ -3836,6 +3880,7 @@ export default function App() {
           target_shape: frame.target?.shape ?? null,
           cursors: frame.cursors,
           participant_targets: frame.participantTargets ?? {},
+          participant_target_pairs: frame.participantTargetPairs ?? {},
           group_averages: frame.groupAverages ?? {},
         }));
 
@@ -4544,6 +4589,7 @@ export default function App() {
                 const startTime = Date.now();
                 recordingFrameNumberRef.current = 0;
                 sharedTrackingStartsRef.current.clear();
+                task9ParticipantTargetStatesRef.current.clear();
                 const session: RecordingSession = {
                   startTime,
                   roomName,
@@ -5429,6 +5475,7 @@ export default function App() {
     setRecordingSession(session);
     setIsRecording(true);
     recordingFrameNumberRef.current = 0;
+    task9ParticipantTargetStatesRef.current.clear();
     adminEventsRef.current = [];
 
     logAdminEvent({ type: 'recordingStarted', timestamp: now });
@@ -6308,7 +6355,7 @@ export default function App() {
         } else if (topic === STATS_TOPIC) {
           try {
             const text = new TextDecoder().decode(payload);
-            const message = JSON.parse(text) as StatsMessage | SharedCursorResponseMessage | SharedTrackingLifecycleMessage | EscPressedMessage;
+            const message = JSON.parse(text) as StatsMessage | SharedCursorResponseMessage | SharedTrackingLifecycleMessage | EscPressedMessage | Task9TargetStateReport | Task9AcquisitionEvent;
             if (message.type === 'stats' && message.identity) {
               setLatencyByIdentity((prev) => {
                 const next = new Map(prev);
@@ -6366,6 +6413,20 @@ export default function App() {
                 participantTimestamp: message.timestamp,
                 timestamp: Date.now(),
               });
+            } else if (message.type === 'task9TargetState' && isAdminRef.current) {
+              const report = buildTask9TargetStateReport(
+                participant?.identity || message.identity,
+                message as unknown as Record<string, unknown>,
+                message.timestamp,
+              );
+              if (report) task9ParticipantTargetStatesRef.current.set(report.identity, report);
+            } else if (message.type === 'task9ScoreAcquired' && isAdminRef.current) {
+              const acquisitionEvent = buildTask9AcquisitionEvent(
+                participant?.identity || message.identity,
+                message as unknown as Record<string, unknown>,
+                Date.now(),
+              );
+              if (acquisitionEvent) logAdminEvent(acquisitionEvent);
             }
           } catch (err) {
             console.error('Failed to parse stats message', err);
@@ -7937,7 +7998,7 @@ export default function App() {
                 </span>
               </div>
             )}
-            <h1>Online Point-to-Point Task</h1>
+            <h1>Online Point-to-Point Task v4</h1>
             <h2>Participant Information and Consent</h2>
 
             <div className="consent-text">

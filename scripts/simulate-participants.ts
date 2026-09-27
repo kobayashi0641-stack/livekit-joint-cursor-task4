@@ -11,7 +11,7 @@
  * Usage:
  *   npx tsx scripts/simulate-participants.ts          # 5 bots (default)
  *   npx tsx scripts/simulate-participants.ts --count 10
- *   npx tsx scripts/simulate-participants.ts --count 3 --server http://localhost:3001 --room joint-cursor-task2
+ *   npx tsx scripts/simulate-participants.ts --count 3 --server http://localhost:3001 --room joint-cursor-task4
  */
 
 import { Room, RoomEvent, DataPacketKind } from '@livekit/rtc-node';
@@ -23,7 +23,7 @@ function parseArgs() {
   const args = process.argv.slice(2);
   let count = 5;
   let server = 'http://localhost:3001';
-  let room = 'joint-cursor-task2';
+  let room = 'joint-cursor-task4';
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--count' && args[i + 1]) {

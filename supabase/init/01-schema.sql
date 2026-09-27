@@ -52,6 +52,8 @@ CREATE TABLE IF NOT EXISTS frames (
   cursors JSONB NOT NULL DEFAULT '[]'::jsonb,
   -- Per-participant visible targets for Task 6, whose local starts may differ.
   participant_targets JSONB NOT NULL DEFAULT '{}'::jsonb,
+  -- Per-participant Task9 target pairs, including indices, positions and score state.
+  participant_target_pairs JSONB NOT NULL DEFAULT '{}'::jsonb,
   group_averages JSONB NOT NULL DEFAULT '{}'::jsonb
 );
 
@@ -65,6 +67,7 @@ ALTER TABLE recordings ADD COLUMN IF NOT EXISTS group_assignments JSONB NOT NULL
 ALTER TABLE recordings ADD COLUMN IF NOT EXISTS group_count INTEGER NOT NULL DEFAULT 1;
 ALTER TABLE frames ADD COLUMN IF NOT EXISTS group_averages JSONB NOT NULL DEFAULT '{}'::jsonb;
 ALTER TABLE frames ADD COLUMN IF NOT EXISTS participant_targets JSONB NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE frames ADD COLUMN IF NOT EXISTS participant_target_pairs JSONB NOT NULL DEFAULT '{}'::jsonb;
 
 -- Migration: add recording-context columns used for filename composition on download.
 -- Safe to re-run; no-op when columns already exist.

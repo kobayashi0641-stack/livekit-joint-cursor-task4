@@ -24,7 +24,7 @@
 const SERVER = process.env.SERVER ?? 'http://localhost:3001';
 const ADMIN = process.env.ADMIN_PASSWORD;
 if (!ADMIN) throw new Error('Missing required environment variable: ADMIN_PASSWORD');
-const ROOM = process.env.ROOM ?? 'joint-cursor-task2';
+const ROOM = process.env.ROOM ?? 'joint-cursor-task4';
 
 const TRIAL_DURATION = 4; // seconds — short to keep total runtime sane
 const TRIALS_PER_TASK = 2;

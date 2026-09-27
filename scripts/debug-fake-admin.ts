@@ -9,7 +9,7 @@
 import { Room, RoomEvent } from '@livekit/rtc-node';
 
 const SERVER = process.env.SERVER ?? 'http://localhost:3001';
-const ROOM = process.env.ROOM ?? 'joint-cursor-task2';
+const ROOM = process.env.ROOM ?? 'joint-cursor-task4';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 if (!ADMIN_PASSWORD) throw new Error('Missing required environment variable: ADMIN_PASSWORD');
 

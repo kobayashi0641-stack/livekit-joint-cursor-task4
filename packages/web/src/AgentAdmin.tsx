@@ -283,7 +283,7 @@ export default function AgentAdmin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [roomName, setRoomName] = useState('joint-cursor-task2');
+  const [roomName, setRoomName] = useState('joint-cursor-task4');
   const [showRules, setShowRules] = useState(false);
   const pollRef = useRef<number | null>(null);
   const initialLoadDoneRef = useRef(false);

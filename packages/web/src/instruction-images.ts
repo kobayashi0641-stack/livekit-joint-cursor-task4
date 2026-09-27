@@ -8,6 +8,8 @@ const FINAL_BASELINE_INSTRUCTION = 'Finally, you will complete baseline trials a
 const TASK8_SHARED_TRIAL_INSTRUCTION = 'From the next trial, you will control a shared cursor with your partner. You can only move it forward and backward, while your partner will control it left and right.';
 const TASK9_GOAL_INSTRUCTION_PREFIX = 'Reach as many red targets as possible within ';
 const TASK9_GOAL_INSTRUCTION_SUFFIX = ' seconds. Keep the cursor inside the target briefly to earn a point. Passing through does not count.';
+const TASK9_TWO_TARGETS_INSTRUCTION = 'Two red targets will appear at the same time. Move the cursor to either one and stay on it briefly to earn a point.';
+const TASK9_POINT_TRANSITION_INSTRUCTION = 'Once you earn a point, the green target flashes and a new pair of targets appears. Reach as many red targets as possible within 30 seconds.';
 const TASK9_BASELINE_INSTRUCTION = 'You will first complete baseline trials using your own cursor.';
 const TASK9_SHARED_CURSOR_INSTRUCTION = 'After that, you will control a shared cursor with the other participant.';
 const TASK9_SHARED_RATING_INSTRUCTION = 'After each shared-cursor trial, rate your contribution to earning the points.';
@@ -30,6 +32,8 @@ export function getInstructionImageSrc(
   experimentTaskType?: ExperimentTaskType | null,
 ): string | null {
   if (experimentTaskType === 'task9') {
+    if (instruction === TASK9_TWO_TARGETS_INSTRUCTION) return '/task9-instruction1-two-targets.png';
+    if (instruction === TASK9_POINT_TRANSITION_INSTRUCTION) return '/task9-instruction2-point-transition.png';
     if (isTask9GoalInstruction(instruction)) return '/task9-instruction1.png';
     if (instruction === TASK9_BASELINE_INSTRUCTION) return '/task9-instruction2.png';
     if (instruction === TASK9_SHARED_CURSOR_INSTRUCTION) return '/task9-instruction3.png';
@@ -64,6 +68,12 @@ export function getInstructionImageSrc(
 }
 
 export function getInstructionImageAlt(instruction: string): string {
+  if (instruction === TASK9_TWO_TARGETS_INSTRUCTION) {
+    return 'Two red targets appear at the same time, and the cursor can move to either target.';
+  }
+  if (instruction === TASK9_POINT_TRANSITION_INSTRUCTION) {
+    return 'The reached target flashes green while a new pair of red targets appears.';
+  }
   if (isTask9GoalInstruction(instruction)) {
     return 'A point-to-point task screen shows the score, cursor, and red target.';
   }

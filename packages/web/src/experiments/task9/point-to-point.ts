@@ -5,6 +5,12 @@ export type Task9DwellState = {
   scored: boolean;
 };
 
+export type Task9TargetPair = [number, number];
+
+export type Task9TargetDwellState = Task9DwellState & {
+  targetIndex: number | null;
+};
+
 export type Task9Clock = {
   phase: 'countdown' | 'running' | 'complete';
   countdown: number | null;
@@ -23,9 +29,10 @@ export type Task9TrialState = {
   identityKey: string;
   sequence: number;
   score: number;
-  targetIndex: number;
+  previousTargetIndex: number;
+  targetIndices: Task9TargetPair;
   targetPresentedAt: number;
-  dwell: Task9DwellState;
+  dwell: Task9TargetDwellState;
 };
 
 export type Task9Acquisition = {
@@ -33,7 +40,11 @@ export type Task9Acquisition = {
   identityKey: string;
   sequence: number;
   score: number;
+  targetIndices: Task9TargetPair;
   targetIndex: number;
+  unchosenTargetIndex: number;
+  nextTargetIndices: Task9TargetPair;
+  /** First next-pair index retained for existing recording consumers. */
   nextTargetIndex: number;
   targetPresentedAt: number;
   acquiredAt: number;
@@ -55,16 +66,20 @@ export function advanceTask9SharedTargetParams(
   }
   const sequence = Number(params.sequence ?? 0);
   const score = Number(params.score ?? 0);
-  // The server's initial trial payload carries the shared seed but not the
-  // derived grid index. The first acquisition therefore supplies the current
-  // index; every authoritative update after that includes it explicitly.
-  const targetIndex = Number(params.targetIndex ?? acquisition.targetIndex);
+  // The server's initial payload carries the seed but not the derived pair.
+  // The first acquisition supplies that pair; subsequent updates include it.
+  const targetIndices = Array.isArray(params.targetIndices)
+    && params.targetIndices.length === 2
+    && params.targetIndices.every((value) => Number.isInteger(Number(value)))
+    ? [Number(params.targetIndices[0]), Number(params.targetIndices[1])] as Task9TargetPair
+    : acquisition.targetIndices;
   if (
     !Number.isFinite(sequence)
     || !Number.isFinite(score)
-    || !Number.isFinite(targetIndex)
     || acquisition.sequence !== sequence
-    || acquisition.targetIndex !== targetIndex
+    || acquisition.targetIndices[0] !== targetIndices[0]
+    || acquisition.targetIndices[1] !== targetIndices[1]
+    || !targetIndices.includes(acquisition.targetIndex)
   ) {
     return null;
   }
@@ -72,6 +87,9 @@ export function advanceTask9SharedTargetParams(
     ...params,
     sequence: sequence + 1,
     score: score + 1,
+    previousTargetIndex: acquisition.targetIndex,
+    targetIndices: acquisition.nextTargetIndices,
+    // Preserve the legacy scalar as the first member of the next pair.
     targetIndex: acquisition.nextTargetIndex,
     targetPresentedAt: now,
   };
@@ -144,6 +162,52 @@ function mix32(value: number): number {
   mixed = Math.imul(mixed, 0x846ca68b);
   mixed ^= mixed >>> 16;
   return mixed >>> 0;
+}
+
+function targetDistanceShells(anchorIndex: number): number[][] {
+  const grid = createTask9TargetGrid();
+  const anchor = grid[anchorIndex];
+  if (!anchor) return [];
+
+  const shells = new Map<number, number[]>();
+  for (let targetIndex = 0; targetIndex < grid.length; targetIndex += 1) {
+    if (targetIndex === anchorIndex) continue;
+    const dx = grid[targetIndex].x - anchor.x;
+    const dy = grid[targetIndex].y - anchor.y;
+    const roundedSquaredDistance = Math.round((dx * dx + dy * dy) * 1e12) / 1e12;
+    const shell = shells.get(roundedSquaredDistance) ?? [];
+    shell.push(targetIndex);
+    shells.set(roundedSquaredDistance, shell);
+  }
+
+  return [...shells.entries()]
+    .filter(([, targetIndices]) => targetIndices.length >= 2)
+    .sort(([distanceA], [distanceB]) => distanceA - distanceB)
+    .map(([, targetIndices]) => targetIndices);
+}
+
+export function selectNextTargetPair(
+  seed: number,
+  sequence: number,
+  previousIndex: number,
+): [number, number] {
+  const shells = targetDistanceShells(previousIndex);
+  if (shells.length === 0) {
+    throw new Error(`No equidistant target pair is available from grid index ${previousIndex}`);
+  }
+
+  let randomState = mix32(
+    (Math.floor(seed) >>> 0)
+      ^ Math.imul(Math.max(0, Math.floor(sequence)) + 1, 0x9e3779b1)
+      ^ Math.imul(previousIndex + 1, 0x85ebca6b),
+  );
+  const shell = shells[randomState % shells.length];
+  randomState = mix32((randomState + 0x6d2b79f5) >>> 0);
+  const firstPosition = randomState % shell.length;
+  randomState = mix32((randomState + 0x6d2b79f5) >>> 0);
+  const secondPosition = randomState % (shell.length - 1);
+  const adjustedSecondPosition = secondPosition >= firstPosition ? secondPosition + 1 : secondPosition;
+  return [shell[firstPosition], shell[adjustedSecondPosition]];
 }
 
 function shuffledTask9TargetSet(seed: number, setIndex: number): number[] {
@@ -221,6 +285,26 @@ export function updateDwellState(
   };
 }
 
+export function updateTargetDwellState(
+  state: Task9TargetDwellState,
+  insideTargetIndex: number | null,
+  now: number,
+  requiredMs: number,
+): Task9TargetDwellState {
+  if (state.scored) return state;
+  if (insideTargetIndex === null) {
+    return { targetIndex: null, enteredAt: null, scored: false };
+  }
+  const enteredAt = state.targetIndex === insideTargetIndex && state.enteredAt !== null
+    ? state.enteredAt
+    : now;
+  return {
+    targetIndex: insideTargetIndex,
+    enteredAt,
+    scored: now - enteredAt >= Math.max(0, requiredMs),
+  };
+}
+
 export function getTask9Clock(
   elapsedMs: number,
   countdownMs: number,
@@ -253,45 +337,59 @@ export function createTask9TrialState(
   identityKey: string,
   now: number,
 ): Task9TrialState {
+  const previousTargetIndex = 0;
   return {
     trialKey,
     seed,
     identityKey,
     sequence: 0,
     score: 0,
-    targetIndex: selectNextTargetIndex(seed, 0, null, identityKey),
+    previousTargetIndex,
+    targetIndices: selectNextTargetPair(seed, 0, previousTargetIndex),
     targetPresentedAt: now,
-    dwell: { enteredAt: null, scored: false },
+    dwell: { targetIndex: null, enteredAt: null, scored: false },
   };
 }
 
 export function updateTask9TrialHit(
   state: Task9TrialState,
-  inside: boolean,
+  insideTargetIndex: number | null,
   now: number,
   requiredDwellMs: number,
   mode: 'solo' | 'shared',
 ): { state: Task9TrialState; acquisition: Task9Acquisition | null } {
   const previousDwell = state.dwell;
-  const dwell = updateDwellState(previousDwell, inside, now, requiredDwellMs);
+  const validInsideTargetIndex = insideTargetIndex !== null && state.targetIndices.includes(insideTargetIndex)
+    ? insideTargetIndex
+    : null;
+  const dwell = updateTargetDwellState(previousDwell, validInsideTargetIndex, now, requiredDwellMs);
   if (!dwell.scored || previousDwell.scored) {
     return { state: { ...state, dwell }, acquisition: null };
   }
 
+  const targetIndex = dwell.targetIndex;
+  if (targetIndex === null) {
+    return { state: { ...state, dwell }, acquisition: null };
+  }
   const nextSequence = state.sequence + 1;
-  const nextTargetIndex = selectNextTargetIndex(
+  const nextTargetIndices = selectNextTargetPair(
     state.seed,
     nextSequence,
-    state.targetIndex,
-    state.identityKey,
+    targetIndex,
   );
+  const unchosenTargetIndex = state.targetIndices[0] === targetIndex
+    ? state.targetIndices[1]
+    : state.targetIndices[0];
   const acquisition: Task9Acquisition = {
     trialKey: state.trialKey,
     identityKey: state.identityKey,
     sequence: state.sequence,
     score: state.score + 1,
-    targetIndex: state.targetIndex,
-    nextTargetIndex,
+    targetIndices: state.targetIndices,
+    targetIndex,
+    unchosenTargetIndex,
+    nextTargetIndices,
+    nextTargetIndex: nextTargetIndices[0],
     targetPresentedAt: state.targetPresentedAt,
     acquiredAt: now,
     movementTimeMs: Math.max(0, now - state.targetPresentedAt),
@@ -305,9 +403,10 @@ export function updateTask9TrialHit(
       ...state,
       sequence: nextSequence,
       score: state.score + 1,
-      targetIndex: nextTargetIndex,
+      previousTargetIndex: targetIndex,
+      targetIndices: nextTargetIndices,
       targetPresentedAt: now,
-      dwell: { enteredAt: null, scored: false },
+      dwell: { targetIndex: null, enteredAt: null, scored: false },
     },
     acquisition,
   };
@@ -315,12 +414,12 @@ export function updateTask9TrialHit(
 
 export function syncTask9AuthoritativeState(
   state: Task9TrialState,
-  authoritative: Pick<Task9TrialState, 'sequence' | 'score' | 'targetIndex' | 'targetPresentedAt'>,
+  authoritative: Pick<Task9TrialState, 'sequence' | 'score' | 'previousTargetIndex' | 'targetIndices' | 'targetPresentedAt'>,
 ): Task9TrialState {
   if (authoritative.sequence <= state.sequence) return state;
   return {
     ...state,
     ...authoritative,
-    dwell: { enteredAt: null, scored: false },
+    dwell: { targetIndex: null, enteredAt: null, scored: false },
   };
 }

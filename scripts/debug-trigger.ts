@@ -46,7 +46,7 @@ async function main() {
   console.log(await post('/agent/rules', { adminPassword: ADMIN, rules }));
 
   console.log('[trigger] Starting agent…');
-  console.log(await post('/agent/start', { adminPassword: ADMIN, roomName: 'joint-cursor-task2' }));
+  console.log(await post('/agent/start', { adminPassword: ADMIN, roomName: 'joint-cursor-task4' }));
   console.log('[trigger] Done. Watch the listener log.');
 }
 
