@@ -1,0 +1,24 @@
+---
+name: LiveKit Joint Cursor Task4
+active_window_index: 0
+windows:
+  - active_tab_index: 2
+    tabs:
+      - title: Task4 Docker
+        color: cyan
+        layout:
+          cwd: 'C:\Users\owner\Documents\ChatGPT\liveKit-joint-cursor Task4'
+          commands:
+            - exec: docker compose up -d
+      - title: Task4 Server :3004
+        color: blue
+        layout:
+          cwd: 'C:\Users\owner\Documents\ChatGPT\liveKit-joint-cursor Task4'
+          commands:
+            - exec: npm run dev:server
+      - title: Task4 Web :5176
+        color: green
+        layout:
+          cwd: 'C:\Users\owner\Documents\ChatGPT\liveKit-joint-cursor Task4'
+          commands:
+            - exec: npm run dev:web

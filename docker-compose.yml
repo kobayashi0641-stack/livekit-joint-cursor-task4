@@ -12,11 +12,15 @@ services:
     restart: unless-stopped
     # Local browser tabs connect through localhost. Keep the default stable
     # across Wi-Fi/VPN changes; set LIVEKIT_NODE_IP explicitly for LAN clients.
-    command: --config /etc/livekit.yaml --node-ip ${LIVEKIT_NODE_IP:-127.0.0.1}
+    command: >-
+      --config /etc/livekit.yaml
+      --node-ip ${LIVEKIT_NODE_IP:-127.0.0.1}
+      --rtc.tcp_port ${LIVEKIT_TCP_PORT:-7901}
+      --udp-port ${LIVEKIT_UDP_PORT:-7902}
     ports:
-      - "${LIVEKIT_PORT:-7880}:7880"
-      - "${LIVEKIT_TCP_PORT:-7881}:7881"
-      - "${LIVEKIT_UDP_PORT:-7882}:7882/udp"
+      - "${LIVEKIT_PORT:-7900}:7880"
+      - "${LIVEKIT_TCP_PORT:-7901}:${LIVEKIT_TCP_PORT:-7901}"
+      - "${LIVEKIT_UDP_PORT:-7902}:${LIVEKIT_UDP_PORT:-7902}/udp"
     volumes:
       - ./livekit/local.yaml:/etc/livekit.yaml:ro
 
@@ -25,7 +29,7 @@ services:
     image: postgres:15-alpine
     restart: unless-stopped
     ports:
-      - "${POSTGRES_PORT:-54322}:5432"
+      - "${POSTGRES_PORT:-54342}:5432"
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
@@ -58,7 +62,7 @@ services:
     image: kong:3.4
     restart: unless-stopped
     ports:
-      - "${SUPABASE_PORT:-54321}:8000"
+      - "${SUPABASE_PORT:-54341}:8000"
     environment:
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml

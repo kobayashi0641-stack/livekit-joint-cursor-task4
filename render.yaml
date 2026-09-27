@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: livekit-joint-cursor-task2
+    name: livekit-joint-cursor-task4
     env: node
     plan: free
     healthCheckPath: /healthz
@@ -25,5 +25,9 @@ services:
         sync: false
       - key: VITE_SUPABASE_ANON_KEY
         sync: false
+      - key: PROLIFIC_API_TOKEN
+        sync: false
+      - key: PROLIFIC_API_BASE_URL
+        value: https://api.prolific.com/api/v1
       - key: TOKEN_TTL_SECONDS
         value: 600
