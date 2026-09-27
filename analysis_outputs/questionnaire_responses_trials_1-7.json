@@ -1,0 +1,73 @@
+{
+  "source": "C:\\Users\\owner\\Downloads\\2026-05-26T05-39-03_shared-single-cursor-control_N2_2026-05-26T05-38-39_8-trials.json",
+  "ignoredTrials": [
+    8
+  ],
+  "responses": [
+    {
+      "trialNumber": 1,
+      "phase": "baseline",
+      "responses": []
+    },
+    {
+      "trialNumber": 2,
+      "phase": "baseline",
+      "responses": []
+    },
+    {
+      "trialNumber": 3,
+      "phase": "baseline",
+      "responses": []
+    },
+    {
+      "trialNumber": 4,
+      "phase": "baseline",
+      "responses": []
+    },
+    {
+      "trialNumber": 5,
+      "phase": "baseline",
+      "responses": []
+    },
+    {
+      "trialNumber": 6,
+      "phase": "shared",
+      "responses": [
+        {
+          "identity": "testA",
+          "agency": 0,
+          "partnership": 0,
+          "t": 31077,
+          "timestamp": 1779774131324
+        },
+        {
+          "identity": "testB",
+          "agency": 3,
+          "partnership": 3,
+          "t": 47180,
+          "timestamp": 1779774147427
+        }
+      ]
+    },
+    {
+      "trialNumber": 7,
+      "phase": "shared",
+      "responses": [
+        {
+          "identity": "testA",
+          "agency": 1,
+          "partnership": 1,
+          "t": 34243,
+          "timestamp": 1779774170495
+        },
+        {
+          "identity": "testB",
+          "agency": 3,
+          "partnership": 2,
+          "t": 49840,
+          "timestamp": 1779774186092
+        }
+      ]
+    }
+  ]
+}

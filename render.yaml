@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: livekit-joint-cursor-task2
+    env: node
+    plan: free
+    healthCheckPath: /healthz
+    buildCommand: |
+      npm ci
+      npm run build --workspace=@cursor/web
+      npm run build --workspace=@cursor/server
+    startCommand: node packages/server/dist/index.js
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      # 以下はRenderのダッシュボードで実値を設定してください（Secretにすること）
+      - key: LIVEKIT_API_KEY
+        sync: false
+      - key: LIVEKIT_API_SECRET
+        sync: false
+      - key: LIVEKIT_WS_URL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: TOKEN_TTL_SECONDS
+        value: 600

@@ -1,0 +1,74 @@
+###############################################################################
+# Local Supabase stack for development
+# Usage:  docker compose up -d
+# Reset:  docker compose down -v   (removes data)
+###############################################################################
+
+services:
+  # Local LiveKit SFU for development. This keeps localhost/LAN testing off
+  # LiveKit Cloud quota. The token server uses devkey/devsecret from this file.
+  livekit:
+    image: livekit/livekit-server:v1.8
+    restart: unless-stopped
+    # Local browser tabs connect through localhost. Keep the default stable
+    # across Wi-Fi/VPN changes; set LIVEKIT_NODE_IP explicitly for LAN clients.
+    command: --config /etc/livekit.yaml --node-ip ${LIVEKIT_NODE_IP:-127.0.0.1}
+    ports:
+      - "${LIVEKIT_PORT:-7880}:7880"
+      - "${LIVEKIT_TCP_PORT:-7881}:7881"
+      - "${LIVEKIT_UDP_PORT:-7882}:7882/udp"
+    volumes:
+      - ./livekit/local.yaml:/etc/livekit.yaml:ro
+
+  # ── PostgreSQL ─────────────────────────────────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_PORT:-54322}:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./supabase/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── PostgREST (REST API over PostgreSQL) ───────────────────────────────────
+  rest:
+    image: postgrest/postgrest:v12.0.1
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://authenticator:postgres@db:5432/postgres
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: super-secret-jwt-token-with-at-least-32-characters-long
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+
+  # ── Kong API Gateway ──────────────────────────────────────────────────────
+  # Routes /rest/v1/* -> PostgREST so @supabase/supabase-js works as-is.
+  kong:
+    image: kong:3.4
+    restart: unless-stopped
+    ports:
+      - "${SUPABASE_PORT:-54321}:8000"
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl
+      KONG_LOG_LEVEL: warn
+    volumes:
+      - ./supabase/kong/kong.yml:/var/lib/kong/kong.yml:ro
+    depends_on:
+      - rest
+
+volumes:
+  db_data:

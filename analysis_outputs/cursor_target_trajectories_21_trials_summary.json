@@ -1,0 +1,302 @@
+{
+  "source": "C:\\Users\\owner\\Downloads\\2026-05-26T07-56-17_shared-single-cursor-control_N2_2026-05-26T07-55-31_21-trials.json",
+  "experimentName": "shared-single-cursor-control_N2_2026-05-26T07-55-31",
+  "trialCount": 21,
+  "participants": [
+    "testA",
+    "testB"
+  ],
+  "summaries": [
+    {
+      "trialNumber": 1,
+      "phase": "baseline",
+      "frames": 1702,
+      "durationSec": 27.257,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1563,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 2,
+      "phase": "baseline",
+      "frames": 1885,
+      "durationSec": 30.195,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1563,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 3,
+      "phase": "baseline",
+      "frames": 2815,
+      "durationSec": 45.083,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1562,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 4,
+      "phase": "shared",
+      "frames": 4284,
+      "durationSec": 68.588,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1563,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 5,
+      "phase": "shared",
+      "frames": 4631,
+      "durationSec": 74.173,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1563,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 6,
+      "phase": "shared",
+      "frames": 2649,
+      "durationSec": 42.407,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1562,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 7,
+      "phase": "shared",
+      "frames": 2423,
+      "durationSec": 38.792,
+      "targetSource": "recorded:testB",
+      "targetMovingPoints": 1563,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 8,
+      "phase": "shared",
+      "frames": 2412,
+      "durationSec": 38.649,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1562,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 9,
+      "phase": "shared",
+      "frames": 2037,
+      "durationSec": 32.794,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1563,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 10,
+      "phase": "shared",
+      "frames": 2291,
+      "durationSec": 36.684,
+      "targetSource": "recorded:testB",
+      "targetMovingPoints": 1562,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 11,
+      "phase": "shared",
+      "frames": 2328,
+      "durationSec": 37.275,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1563,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 12,
+      "phase": "shared",
+      "frames": 3333,
+      "durationSec": 53.37,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1563,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 13,
+      "phase": "shared",
+      "frames": 2384,
+      "durationSec": 38.178,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1563,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 14,
+      "phase": "shared",
+      "frames": 2268,
+      "durationSec": 36.326,
+      "targetSource": "recorded:testB",
+      "targetMovingPoints": 1562,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 15,
+      "phase": "shared",
+      "frames": 2114,
+      "durationSec": 33.851,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1562,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 16,
+      "phase": "shared",
+      "frames": 2058,
+      "durationSec": 32.955,
+      "targetSource": "recorded:testB",
+      "targetMovingPoints": 1563,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 17,
+      "phase": "shared",
+      "frames": 2424,
+      "durationSec": 38.817,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1562,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 18,
+      "phase": "shared",
+      "frames": 2279,
+      "durationSec": 36.496,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1562,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 19,
+      "phase": "solo",
+      "frames": 2144,
+      "durationSec": 34.34,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1562,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 20,
+      "phase": "solo",
+      "frames": 2104,
+      "durationSec": 33.7,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1563,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    },
+    {
+      "trialNumber": 21,
+      "phase": "solo",
+      "frames": 2190,
+      "durationSec": 35.141,
+      "targetSource": "recorded:testA",
+      "targetMovingPoints": 1562,
+      "eventTypes": {
+        "sharedTrackingStart": 2,
+        "sharedTrackingComplete": 2,
+        "sharedCursorResponse": 2,
+        "recordingStopped": 1
+      }
+    }
+  ]
+}

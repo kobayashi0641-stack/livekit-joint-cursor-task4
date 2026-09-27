@@ -1,0 +1,17 @@
+_format_version: "1.1"
+
+# Kong API Gateway config for local Supabase development.
+# Routes /rest/v1/* to PostgREST.
+# No authentication is enforced at the gateway level for local dev;
+# PostgREST itself handles role-based access via the JWT / anon role.
+
+services:
+  - name: rest-v1
+    url: http://rest:3000/
+    routes:
+      - name: rest-v1
+        strip_path: true
+        paths:
+          - /rest/v1/
+    plugins:
+      - name: cors

@@ -1,0 +1,23 @@
+{
+  "name": "livekit-joint-cursor-task2",
+  "private": true,
+  "workspaces": [
+    "packages/server",
+    "packages/web"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev --workspace=@cursor/server",
+    "dev:web": "npm run dev --workspace=@cursor/web",
+    "dev:docker": "docker compose up -d",
+    "dev:docker:stop": "docker compose down",
+    "dev:docker:reset": "docker compose down -v",
+    "simulate": "npx tsx scripts/simulate-participants.ts",
+    "simulate:browser": "bash scripts/open-participants.sh",
+    "build": "npm run build --workspace=@cursor/web",
+    "typecheck": "npm run typecheck --if-present --workspaces"
+  },
+  "devDependencies": {
+    "@livekit/rtc-node": "^0.12.0",
+    "tsx": "^4.7.1"
+  }
+}
